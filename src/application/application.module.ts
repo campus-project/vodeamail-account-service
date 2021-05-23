@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
-import { DomainModule } from '../domain/domain.module';
-import { InfrastructureModule } from '../infrastructure/infrastructure.module';
+
 import { RoleExists } from './rules/role-exists.rule';
 import { UserEmailUniqueRule } from './rules/user-email-unique.rule';
+
+import { DomainModule } from '../domain/domain.module';
+import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { OrganizationController } from './controllers/organization.controller';
 import { RoleController } from './controllers/role.controller';
 import { UserController } from './controllers/user.controller';
 import { AuthController } from './controllers/auth.controller';
+import { AccountController } from './controllers/account.controller';
 
 @Module({
   imports: [InfrastructureModule, DomainModule],
@@ -15,6 +18,7 @@ import { AuthController } from './controllers/auth.controller';
     RoleController,
     UserController,
     AuthController,
+    AccountController,
   ],
   providers: [RoleExists, UserEmailUniqueRule],
   exports: [InfrastructureModule, DomainModule],
