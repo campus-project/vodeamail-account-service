@@ -72,13 +72,12 @@ export class RoleService {
       );
     }
 
-    Object.assign(data, {
+    await this.roleRepository.save({
+      ...data,
       organization_id,
       name,
       updated_by: actor,
     });
-
-    await this.roleRepository.save(data);
 
     return await this.findOne({ id: data.id });
   }

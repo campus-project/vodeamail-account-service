@@ -5,7 +5,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Match } from '../../../@core/validators/match.validator';
+import { Match } from '../../../@core/rules/match.rule';
 
 export class ResetPasswordDto {
   @IsNotEmpty()

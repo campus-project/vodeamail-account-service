@@ -28,6 +28,7 @@ import { PasswordReset } from '../../domain/entities/password-reset.entity';
         dropSchema: false,
         logging: false,
         entities: [Organization, Role, User, PasswordReset],
+        timezone: 'UTC',
       }),
     }),
   ],

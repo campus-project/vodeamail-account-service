@@ -1,11 +1,19 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AppModule } from './app.module';
 import { ClassSerializerInterceptor } from '@nestjs/common';
-import { ExceptionRpcFilter } from './@core/filters/exception-rpc.filter';
 import { useContainer } from 'class-validator';
-import { ValidationRpcPipe } from './@core/pipes/validation-rpc.pipe';
 import { ConfigService } from '@nestjs/config';
+import {
+  initializeTransactionalContext,
+  patchTypeORMRepositoryWithBaseRepository,
+} from 'typeorm-transactional-cls-hooked';
+
+import { AppModule } from './app.module';
+import { ExceptionRpcFilter } from './@core/filters/exception-rpc.filter';
+import { ValidationRpcPipe } from './@core/pipes/validation-rpc.pipe';
+
+initializeTransactionalContext();
+patchTypeORMRepositoryWithBaseRepository();
 
 (async () => {
   const configService = new ConfigService();

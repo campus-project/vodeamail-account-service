@@ -27,6 +27,7 @@ export class UserService {
     const randomPwd = randomString(8);
     const password = await hash(randomPwd, await genSalt(10));
 
+    //todo: remove this after send password feature done
     console.log(randomPwd);
 
     const data = await this.userRepository.save({
@@ -92,15 +93,14 @@ export class UserService {
       );
     }
 
-    Object.assign(data, {
+    await this.userRepository.save({
+      ...data,
       organization_id,
       name,
       email,
       role_id,
       updated_by: actor,
     });
-
-    await this.userRepository.save(data);
 
     return await this.findOne({ id: data.id });
   }

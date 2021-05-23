@@ -81,15 +81,14 @@ export class OrganizationService {
       );
     }
 
-    Object.assign(data, {
+    await this.organizationRepository.save({
+      ...data,
       name,
       address,
       telephone,
       fax,
       updated_by: actor,
     });
-
-    await this.organizationRepository.save(data);
 
     return await this.findOne({ id: data.id });
   }
