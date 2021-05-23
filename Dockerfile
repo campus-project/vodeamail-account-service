@@ -12,6 +12,4 @@ WORKDIR /usr/local/app
 
 COPY --from=build /usr/local/app .
 
-EXPOSE 3000
-
 CMD ["node", "main.js"]
