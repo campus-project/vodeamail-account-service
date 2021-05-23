@@ -5,6 +5,8 @@ import { AccountService } from '../../domain/services/account.service';
 import { GetAccountDto } from '../dtos/account/get-account.dto';
 import { UpdateAccountDto } from '../dtos/account/update-account.dto';
 import { ChangePasswordAccountDto } from '../dtos/account/change-password-account.dto';
+import { GetMyOrganizationDto } from '../dtos/account/get-my-organization.dto';
+import { UpdateMyOrganizationDto } from '../dtos/account/update-my-organization.dto';
 
 @Controller()
 export class AccountController {
@@ -13,19 +15,33 @@ export class AccountController {
   ) {}
 
   @MessagePattern('getAccount')
-  login(@Payload('value') getAccountDto: GetAccountDto) {
+  getAccount(@Payload('value') getAccountDto: GetAccountDto) {
     return this.accountService.getAccount(getAccountDto);
   }
 
   @MessagePattern('updateAccount')
-  loginWithId(@Payload('value') updateAccountDto: UpdateAccountDto) {
+  updateAccount(@Payload('value') updateAccountDto: UpdateAccountDto) {
     return this.accountService.updateAccount(updateAccountDto);
   }
 
   @MessagePattern('changePasswordAccount')
-  register(
+  changePasswordAccount(
     @Payload('value') changePasswordAccountDto: ChangePasswordAccountDto,
   ) {
     return this.accountService.changePasswordAccount(changePasswordAccountDto);
+  }
+
+  @MessagePattern('getMyOrganization')
+  getMyOrganization(
+    @Payload('value') getMyOrganizationDto: GetMyOrganizationDto,
+  ) {
+    return this.accountService.getMyOrganization(getMyOrganizationDto);
+  }
+
+  @MessagePattern('updateMyOrganization')
+  updateMyOrganization(
+    @Payload('value') updateMyOrganizationDto: UpdateMyOrganizationDto,
+  ) {
+    return this.accountService.updateMyOrganization(updateMyOrganizationDto);
   }
 }

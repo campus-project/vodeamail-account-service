@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Brackets, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RpcException } from '@nestjs/microservices';
 
@@ -39,22 +39,17 @@ export class OrganizationService {
     findAllOrganizationDto: FindOrganizationDto,
   ): Promise<Organization[]> {
     const { id, ids } = findAllOrganizationDto;
-    const qb = this.organizationRepository
-      .createQueryBuilder('organizations')
-      .select('organizations.*')
-      .where(
-        new Brackets((q) => {
-          if (id !== undefined) {
-            q.where('organizations.id = :id', { id });
-          }
 
-          if (Array.isArray(ids) && ids.length) {
-            q.andWhere('organizations.id IN (:...ids)', { ids });
-          }
-        }),
-      );
+    const filteredIds = ids === undefined ? [] : ids;
+    if (id !== undefined) {
+      filteredIds.push(id);
+    }
 
-    return await qb.execute();
+    return await this.organizationRepository.find({
+      where: {
+        ...(id || ids ? { id: In(filteredIds) } : {}),
+      },
+    });
   }
 
   async findOne(
@@ -75,7 +70,7 @@ export class OrganizationService {
       throw new RpcException(
         JSON.stringify({
           statusCode: HttpStatus.NOT_FOUND,
-          message: `Count not find resource ${id}`,
+          message: `Count not find resource ${id}.`,
           error: 'Not Found',
         }),
       );
@@ -104,7 +99,7 @@ export class OrganizationService {
       throw new RpcException(
         JSON.stringify({
           statusCode: HttpStatus.NOT_FOUND,
-          message: `Count not find resource ${id}`,
+          message: `Count not find resource ${id}.`,
           error: 'Not Found',
         }),
       );

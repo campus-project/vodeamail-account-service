@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Brackets, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RpcException } from '@nestjs/microservices';
 
@@ -29,27 +29,26 @@ export class RoleService {
       updated_by: actor,
     });
 
-    return await this.findOne({ id: data.id });
+    return await this.findOne({
+      id: data.id,
+      organization_id: data.organization_id,
+    });
   }
 
   async findAll(findAllRoleDto: FindRoleDto): Promise<Role[]> {
-    const { id, ids } = findAllRoleDto;
-    const qb = this.roleRepository
-      .createQueryBuilder('roles')
-      .select('roles.*')
-      .where(
-        new Brackets((q) => {
-          if (id !== undefined) {
-            q.where('roles.id = :id', { id });
-          }
+    const { id, ids, organization_id } = findAllRoleDto;
 
-          if (Array.isArray(ids) && ids.length) {
-            q.andWhere('roles.id IN (:...ids)', { ids });
-          }
-        }),
-      );
+    const filteredIds = ids === undefined ? [] : ids;
+    if (id !== undefined) {
+      filteredIds.push(id);
+    }
 
-    return await qb.execute();
+    return await this.roleRepository.find({
+      where: {
+        organization_id: organization_id,
+        ...(id || ids ? { id: In(filteredIds) } : {}),
+      },
+    });
   }
 
   async findOne(findOneRoleDto: FindRoleDto): Promise<Role> {
@@ -66,7 +65,7 @@ export class RoleService {
       throw new RpcException(
         JSON.stringify({
           statusCode: HttpStatus.NOT_FOUND,
-          message: `Count not find resource ${id}`,
+          message: `Count not find resource ${id}.`,
           error: 'Not Found',
         }),
       );
@@ -79,7 +78,10 @@ export class RoleService {
       updated_by: actor,
     });
 
-    return await this.findOne({ id: data.id });
+    return await this.findOne({
+      id: data.id,
+      organization_id: data.organization_id,
+    });
   }
 
   async remove(deleteRoleDto: DeleteRoleDto): Promise<Role> {
@@ -91,7 +93,7 @@ export class RoleService {
       throw new RpcException(
         JSON.stringify({
           statusCode: HttpStatus.NOT_FOUND,
-          message: `Count not find resource ${id}`,
+          message: `Count not find resource ${id}.`,
           error: 'Not Found',
         }),
       );

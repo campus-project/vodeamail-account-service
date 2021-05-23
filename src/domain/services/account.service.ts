@@ -8,12 +8,17 @@ import { User } from '../entities/user.entity';
 import { GetAccountDto } from '../../application/dtos/account/get-account.dto';
 import { UpdateAccountDto } from '../../application/dtos/account/update-account.dto';
 import { ChangePasswordAccountDto } from '../../application/dtos/account/change-password-account.dto';
+import { Organization } from '../entities/organization.entity';
+import { UpdateOrganizationDto } from '../../application/dtos/organization/update-organization.dto';
+import { GetMyOrganizationDto } from '../../application/dtos/account/get-my-organization.dto';
 
 @Injectable()
 export class AccountService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Organization)
+    private readonly organizationRepository: Repository<Organization>,
   ) {}
 
   async getAccount(getAccountDto: GetAccountDto): Promise<User> {
@@ -23,9 +28,9 @@ export class AccountService {
     if (!data) {
       throw new RpcException(
         JSON.stringify({
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: `The credentials does not match in our records.`,
-          error: 'Unauthorized',
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Count not find resource',
+          error: 'Not Found',
         }),
       );
     }
@@ -40,9 +45,9 @@ export class AccountService {
     if (!data) {
       throw new RpcException(
         JSON.stringify({
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: `The credentials does not match in our records.`,
-          error: 'Unauthorized',
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Count not find resource',
+          error: 'Not Found',
         }),
       );
     }
@@ -51,6 +56,7 @@ export class AccountService {
       ...data,
       name,
       email,
+      actor: data.id,
     });
 
     return await this.getAccount({ id });
@@ -86,8 +92,57 @@ export class AccountService {
     await this.userRepository.save({
       ...data,
       password: await hash(password, await genSalt(10)),
+      actor: data.id,
     });
 
     return await this.getAccount({ id });
+  }
+
+  async getMyOrganization(
+    getMyOrganizationDto: GetMyOrganizationDto,
+  ): Promise<Organization> {
+    const { id } = getMyOrganizationDto;
+    const data = await this.organizationRepository.findOne({ id });
+
+    if (!data) {
+      throw new RpcException(
+        JSON.stringify({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Count not find resource',
+          error: 'Not Found',
+        }),
+      );
+    }
+
+    return data;
+  }
+
+  async updateMyOrganization(
+    updateOrganizationDto: UpdateOrganizationDto,
+  ): Promise<Organization> {
+    const { id, name, address, telephone, fax, actor } = updateOrganizationDto;
+
+    const data = await this.organizationRepository.findOne({ id });
+
+    if (!data) {
+      throw new RpcException(
+        JSON.stringify({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: `Count not find resource ${id}.`,
+          error: 'Not Found',
+        }),
+      );
+    }
+
+    await this.organizationRepository.save({
+      ...data,
+      name,
+      address,
+      telephone,
+      fax,
+      updated_by: actor,
+    });
+
+    return await this.getMyOrganization({ id });
   }
 }
