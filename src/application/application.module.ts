@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { RoleExists } from './rules/role-exists.rule';
+import { RoleExistsRule } from './rules/role-exists.rule';
 import { UserEmailUniqueRule } from './rules/user-email-unique.rule';
 
 import { DomainModule } from '../domain/domain.module';
@@ -20,7 +20,7 @@ import { AccountController } from './controllers/account.controller';
     AuthController,
     AccountController,
   ],
-  providers: [RoleExists, UserEmailUniqueRule],
+  providers: [RoleExistsRule, UserEmailUniqueRule],
   exports: [InfrastructureModule, DomainModule],
 })
 export class ApplicationModule {}

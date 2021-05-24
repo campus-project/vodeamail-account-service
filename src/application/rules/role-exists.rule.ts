@@ -6,9 +6,9 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { RoleService } from '../../domain/services/role.service';
 
-@ValidatorConstraint({ name: 'RoleExists', async: true })
+@ValidatorConstraint({ name: 'RoleExistsRule', async: true })
 @Injectable()
-export class RoleExists implements ValidatorConstraintInterface {
+export class RoleExistsRule implements ValidatorConstraintInterface {
   constructor(
     @Inject('ROLE_SERVICE')
     private roleService: RoleService,

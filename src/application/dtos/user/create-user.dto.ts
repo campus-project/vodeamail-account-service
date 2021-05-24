@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 
 import { UserEmailUniqueRule } from '../../rules/user-email-unique.rule';
-import { RoleExists } from '../../rules/role-exists.rule';
+import { RoleExistsRule } from '../../rules/role-exists.rule';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -17,7 +17,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsUUID('4')
-  @Validate(RoleExists)
+  @Validate(RoleExistsRule)
   role_id: string;
 
   @IsNotEmpty()
