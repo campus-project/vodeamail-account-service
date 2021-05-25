@@ -34,7 +34,7 @@
     "kafkajs": "^1.15.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "mysql2": "^2.2.5",
+    "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.6",

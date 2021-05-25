@@ -98,7 +98,12 @@ export class UserService {
   async update(updateUserDto: UpdateUserDto): Promise<User> {
     const { id, organization_id, name, email, role_id, actor } = updateUserDto;
 
-    const data = await this.userRepository.findOne({ id });
+    const data = await this.userRepository.findOne({
+      where: {
+        id,
+        organization_id,
+      },
+    });
 
     if (!data) {
       throw new RpcException(
@@ -112,7 +117,6 @@ export class UserService {
 
     await this.userRepository.save({
       ...data,
-      organization_id,
       name,
       email,
       role_id,
@@ -126,9 +130,14 @@ export class UserService {
   }
 
   async remove(deleteUserDto: DeleteUserDto): Promise<User> {
-    const { id, is_hard, actor } = deleteUserDto;
+    const { id, is_hard, organization_id, actor } = deleteUserDto;
 
-    const data = await this.userRepository.findOne({ id });
+    const data = await this.userRepository.findOne({
+      where: {
+        id,
+        organization_id,
+      },
+    });
 
     if (!data) {
       throw new RpcException(

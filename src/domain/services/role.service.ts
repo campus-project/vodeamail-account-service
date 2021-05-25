@@ -59,7 +59,12 @@ export class RoleService {
   async update(updateRoleDto: UpdateRoleDto): Promise<Role> {
     const { id, organization_id, name, actor } = updateRoleDto;
 
-    const data = await this.roleRepository.findOne({ id });
+    const data = await this.roleRepository.findOne({
+      where: {
+        id,
+        organization_id,
+      },
+    });
 
     if (!data) {
       throw new RpcException(
@@ -73,7 +78,6 @@ export class RoleService {
 
     await this.roleRepository.save({
       ...data,
-      organization_id,
       name,
       updated_by: actor,
     });
@@ -85,9 +89,14 @@ export class RoleService {
   }
 
   async remove(deleteRoleDto: DeleteRoleDto): Promise<Role> {
-    const { id, is_hard, actor } = deleteRoleDto;
+    const { id, is_hard, organization_id, actor } = deleteRoleDto;
 
-    const data = await this.roleRepository.findOne({ id });
+    const data = await this.roleRepository.findOne({
+      where: {
+        id,
+        organization_id,
+      },
+    });
 
     if (!data) {
       throw new RpcException(
