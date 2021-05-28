@@ -123,8 +123,10 @@ export class RoleService {
 
   async idExists(roleIdExistsDto: RoleIdExistsDto): Promise<boolean> {
     const { id, organization_id } = roleIdExistsDto;
-    return !!(await this.roleRepository.findOne({
-      where: { id, organization_id },
-    }));
+    return (
+      (await this.roleRepository.count({
+        where: { id, organization_id },
+      })) > 0
+    );
   }
 }
