@@ -23,7 +23,16 @@ export class AccountService {
 
   async getAccount(getAccountDto: GetAccountDto): Promise<User> {
     const { id } = getAccountDto;
-    const data = await this.userRepository.findOne({ id });
+    const data = await this.userRepository.findOne({
+      join: {
+        alias: 'user',
+        innerJoinAndSelect: {
+          organization: 'user.organization',
+          role: 'user.role',
+        },
+      },
+      where: { id },
+    });
 
     if (!data) {
       throw new RpcException(

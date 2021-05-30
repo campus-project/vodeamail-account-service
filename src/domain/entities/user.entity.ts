@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Organization } from './organization.entity';
+import { Role } from './role.entity';
 
 @Entity('users')
 export class User {
@@ -46,4 +49,10 @@ export class User {
 
   @Column({ type: 'uuid', nullable: true })
   deleted_by?: string;
+
+  @ManyToOne(() => Organization, (object) => object.users)
+  organization: Organization;
+
+  @ManyToOne(() => Role, (object) => object.users)
+  role: Role;
 }
