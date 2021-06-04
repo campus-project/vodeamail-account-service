@@ -26,6 +26,11 @@ export class UserController {
     return this.userService.findAll(findUser);
   }
 
+  @MessagePattern('findAllCountUser')
+  findAllCount(@Payload('value') findUser: FindUserDto) {
+    return this.userService.findAllCount(findUser);
+  }
+
   @MessagePattern('findOneUser')
   findOne(@Payload('value') findUser: FindUserDto) {
     return this.userService.findOne(findUser);

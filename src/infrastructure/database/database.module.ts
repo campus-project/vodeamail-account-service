@@ -7,6 +7,7 @@ import { Organization } from '../../domain/entities/organization.entity';
 import { Role } from '../../domain/entities/role.entity';
 import { User } from '../../domain/entities/user.entity';
 import { PasswordReset } from '../../domain/entities/password-reset.entity';
+import { SummaryRoleView } from '../../domain/views/summary-role.view';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { PasswordReset } from '../../domain/entities/password-reset.entity';
         synchronize: true,
         dropSchema: false,
         logging: false,
-        entities: [Organization, Role, User, PasswordReset],
+        entities: [Organization, Role, User, PasswordReset, SummaryRoleView],
         timezone: 'UTC',
       }),
     }),

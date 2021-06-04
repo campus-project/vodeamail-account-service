@@ -6,6 +6,7 @@ import { CreateRoleDto } from '../dtos/role/create-role.dto';
 import { UpdateRoleDto } from '../dtos/role/update-role.dto';
 import { FindRoleDto } from '../dtos/role/find-role.dto';
 import { DeleteRoleDto } from '../dtos/role/delete-role.dto';
+import { RoleIdExistsDto } from '../dtos/role/role-id-exists.dto';
 
 @Controller()
 export class RoleController {
@@ -26,6 +27,11 @@ export class RoleController {
     return this.roleService.findAll(findRole);
   }
 
+  @MessagePattern('findAllCountRole')
+  findAllCount(@Payload('value') findRole: FindRoleDto) {
+    return this.roleService.findAllCount(findRole);
+  }
+
   @MessagePattern('findOneRole')
   findOne(@Payload('value') findRole: FindRoleDto) {
     return this.roleService.findOne(findRole);
@@ -39,5 +45,10 @@ export class RoleController {
   @MessagePattern('removeRole')
   remove(@Payload('value') deleteRole: DeleteRoleDto) {
     return this.roleService.remove(deleteRole);
+  }
+
+  @MessagePattern('existsRole')
+  exists(@Payload('value') existsRole: RoleIdExistsDto) {
+    return this.roleService.idExists(existsRole);
   }
 }

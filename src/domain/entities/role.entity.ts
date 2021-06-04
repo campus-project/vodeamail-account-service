@@ -4,10 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { SummaryRoleView } from '../views/summary-role.view';
 
 @Entity('roles')
 export class Role {
@@ -41,6 +43,11 @@ export class Role {
   @Column({ type: 'uuid', nullable: true })
   deleted_by?: string;
 
-  @OneToMany(() => User, (object) => object.organization)
+  @OneToMany(() => User, (object) => object.organization, {
+    onUpdate: 'CASCADE',
+  })
   users: User[];
+
+  @OneToOne(() => SummaryRoleView, (object) => object.role)
+  summary: SummaryRoleView;
 }

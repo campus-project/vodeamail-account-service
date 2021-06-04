@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { In, Not, Repository } from 'typeorm';
+import { Brackets, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientKafka, RpcException } from '@nestjs/microservices';
 
@@ -75,19 +75,11 @@ export class UserService {
   }
 
   async findAll(findAllUserDto: FindUserDto): Promise<User[]> {
-    const { id, ids, organization_id } = findAllUserDto;
+    return await this.findQueryBuilder(findAllUserDto).getMany();
+  }
 
-    const filteredIds = ids === undefined ? [] : ids;
-    if (id !== undefined) {
-      filteredIds.push(id);
-    }
-
-    return await this.userRepository.find({
-      where: {
-        organization_id: organization_id,
-        ...(id || ids ? { id: In(filteredIds) } : {}),
-      },
-    });
+  async findAllCount(findAllCountUserDto: FindUserDto): Promise<number> {
+    return await this.findQueryBuilder(findAllCountUserDto).getCount();
   }
 
   async findOne(findOneUserDto: FindUserDto): Promise<User> {
@@ -170,5 +162,63 @@ export class UserService {
         ...(exclude === undefined ? {} : { id: Not(exclude) }),
       },
     }));
+  }
+
+  findQueryBuilder(params: FindUserDto): SelectQueryBuilder<User> {
+    const {
+      id,
+      ids,
+      organization_id,
+      search,
+      per_page,
+      page = 1,
+      order_by,
+      sorted_by = 'ASC',
+      relations,
+    } = params;
+
+    const filteredIds = ids === undefined ? [] : ids;
+    if (id !== undefined) {
+      filteredIds.push(id);
+    }
+
+    let qb = this.userRepository.createQueryBuilder('user').where((qb) => {
+      qb.where({
+        organization_id: organization_id,
+        ...(id || ids ? { id: In(filteredIds) } : {}),
+      });
+
+      if (search !== undefined) {
+        const params = { search: `%${search}%` };
+
+        qb.andWhere(
+          new Brackets((q) => {
+            q.where('user.name LIKE :search', params).orWhere(
+              'user.email LIKE :search',
+              params,
+            );
+          }),
+        );
+      }
+    });
+
+    if (relations !== undefined) {
+      if (relations.includes('role')) {
+        qb = qb.leftJoinAndSelect('user.role', 'role');
+      }
+    }
+
+    if (per_page !== undefined) {
+      qb = qb.take(per_page).skip(page > 1 ? per_page * (page - 1) : 0);
+    }
+
+    if (order_by !== undefined) {
+      qb = qb.orderBy(
+        order_by,
+        ['desc'].includes(sorted_by.toLowerCase()) ? 'DESC' : 'ASC',
+      );
+    }
+
+    return qb;
   }
 }

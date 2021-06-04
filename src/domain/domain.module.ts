@@ -2,7 +2,6 @@ import { Module, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
-import { OrganizationService } from './services/organization.service';
 import { RoleService } from './services/role.service';
 import { UserService } from './services/user.service';
 import { AuthService } from './services/auth.service';
@@ -13,10 +12,6 @@ import { User } from './entities/user.entity';
 import { PasswordReset } from './entities/password-reset.entity';
 
 const providers: Provider[] = [
-  {
-    provide: 'ORGANIZATION_SERVICE',
-    useClass: OrganizationService,
-  },
   {
     provide: 'ROLE_SERVICE',
     useClass: RoleService,
