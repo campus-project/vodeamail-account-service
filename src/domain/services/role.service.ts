@@ -148,8 +148,6 @@ export class RoleService {
       filteredIds.push(id);
     }
 
-    console.log(params);
-
     let qb = this.roleRepository
       .createQueryBuilder('role')
       .innerJoinAndSelect('role.summary', 'summary')
