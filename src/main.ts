@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ClassSerializerInterceptor } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -17,17 +17,19 @@ patchTypeORMRepositoryWithBaseRepository();
 
 (async () => {
   const configService = new ConfigService();
+
+  const clientId =
+    configService.get<string>('KAFKA_CLIENT_ID') || 'account-service';
+  const broker = configService.get<string>('KAFKA_BROKER') || 'localhost:9092';
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.KAFKA,
       options: {
         client: {
-          clientId:
-            configService.get<string>('KAFKA_CLIENT_ID') || 'account-service',
-          brokers: [
-            configService.get<string>('KAFKA_BROKER') || 'localhost:9092',
-          ],
+          clientId,
+          brokers: [broker],
         },
         consumer: {
           groupId:
@@ -56,5 +58,9 @@ patchTypeORMRepositoryWithBaseRepository();
   //is used for allow custom pipes attribute
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  await app.listen();
+  await app.listen().then(() => {
+    Logger.log(
+      `Listening from kafka host: ${broker} using client: ${clientId}`,
+    );
+  });
 })();
