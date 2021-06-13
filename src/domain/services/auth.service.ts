@@ -76,7 +76,7 @@ export class AuthService {
   }
 
   @Transactional()
-  async register(registerDto: RegisterDto): Promise<User> {
+  async register(registerDto: RegisterDto): Promise<string> {
     const { name, email, password, organization_name } = registerDto;
 
     const organization = await this.organizationRepository.save({
@@ -97,11 +97,11 @@ export class AuthService {
       role_id: role.id,
     });
 
-    return await this.userRepository.findOne({ id: user.id });
+    return `Welcome ${user.name}, Please login for continue.`;
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<string> {
-    const { email } = forgotPasswordDto;
+    const { email, url } = forgotPasswordDto;
 
     const user = await this.userRepository.findOne({
       where: { email },
@@ -184,6 +184,10 @@ export class AuthService {
       });
     }
 
+    const params = [`token=${token}`, `email=${email}`];
+    const resetPasswordLink =
+      url + (url.split('?')[1] ? '&' : '?') + params.join('&');
+
     await this.clientKafka
       .send('createSendEmail', {
         organization_id: user.organization_id,
@@ -196,8 +200,7 @@ export class AuthService {
           <html lang="en">
             <body>
               <h1>Reset Password Request</h1>
-              <span>This is your token reset password</span>
-              <p><strong>${token}</strong></p>
+              <p><a href="${resetPasswordLink}">Reset Password</a></p>
               <span>Code will expired at 30 minutes from email received</span>
             </body>
           </html>

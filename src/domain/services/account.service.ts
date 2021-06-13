@@ -2,15 +2,16 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RpcException } from '@nestjs/microservices';
-import { compareSync, genSalt, hash } from 'bcryptjs';
-import { User } from '../entities/user.entity';
 
+import { compareSync, genSalt, hash } from 'bcryptjs';
+
+import { User } from '../entities/user.entity';
+import { Organization } from '../entities/organization.entity';
 import { GetAccountDto } from '../../application/dtos/account/get-account.dto';
 import { UpdateAccountDto } from '../../application/dtos/account/update-account.dto';
 import { ChangePasswordAccountDto } from '../../application/dtos/account/change-password-account.dto';
-import { Organization } from '../entities/organization.entity';
-import { UpdateOrganizationDto } from '../../application/dtos/organization/update-organization.dto';
 import { GetMyOrganizationDto } from '../../application/dtos/account/get-my-organization.dto';
+import { UpdateMyOrganizationDto } from '../../application/dtos/account/update-my-organization.dto';
 
 @Injectable()
 export class AccountService {
@@ -23,7 +24,16 @@ export class AccountService {
 
   async getAccount(getAccountDto: GetAccountDto): Promise<User> {
     const { id } = getAccountDto;
-    const data = await this.userRepository.findOne({ id });
+    const data = await this.userRepository.findOne({
+      join: {
+        alias: 'user',
+        innerJoinAndSelect: {
+          organization: 'user.organization',
+          role: 'user.role',
+        },
+      },
+      where: { id },
+    });
 
     if (!data) {
       throw new RpcException(
@@ -118,9 +128,10 @@ export class AccountService {
   }
 
   async updateMyOrganization(
-    updateOrganizationDto: UpdateOrganizationDto,
+    updateMyOrganizationDto: UpdateMyOrganizationDto,
   ): Promise<Organization> {
-    const { id, name, address, telephone, fax, actor } = updateOrganizationDto;
+    const { id, name, address, telephone, fax, actor } =
+      updateMyOrganizationDto;
 
     const data = await this.organizationRepository.findOne({ id });
 

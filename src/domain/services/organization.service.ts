@@ -1,15 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RpcException } from '@nestjs/microservices';
 
 import * as _ from 'lodash';
 
 import { Organization } from '../entities/organization.entity';
-import { CreateOrganizationDto } from '../../application/dtos/organization/create-organization.dto';
-import { UpdateOrganizationDto } from '../../application/dtos/organization/update-organization.dto';
 import { FindOrganizationDto } from '../../application/dtos/organization/find-organization.dto';
-import { DeleteOrganizationDto } from '../../application/dtos/organization/delete-organization.dto';
 
 @Injectable()
 export class OrganizationService {
@@ -18,38 +14,16 @@ export class OrganizationService {
     private readonly organizationRepository: Repository<Organization>,
   ) {}
 
-  async create(
-    createOrganizationDto: CreateOrganizationDto,
-  ): Promise<Organization> {
-    const { name, address, telephone, fax, actor } = createOrganizationDto;
-
-    const data = await this.organizationRepository.save({
-      name,
-      address,
-      telephone,
-      fax,
-      created_by: actor,
-      updated_by: actor,
-    });
-
-    return await this.findOne({ id: data.id });
-  }
-
   async findAll(
     findAllOrganizationDto: FindOrganizationDto,
   ): Promise<Organization[]> {
-    const { id, ids } = findAllOrganizationDto;
+    return await this.findQueryBuilder(findAllOrganizationDto).getMany();
+  }
 
-    const filteredIds = ids === undefined ? [] : ids;
-    if (id !== undefined) {
-      filteredIds.push(id);
-    }
-
-    return await this.organizationRepository.find({
-      where: {
-        ...(id || ids ? { id: In(filteredIds) } : {}),
-      },
-    });
+  async findAllCount(
+    findAllCountOrganizationDto: FindOrganizationDto,
+  ): Promise<number> {
+    return await this.findQueryBuilder(findAllCountOrganizationDto).getCount();
   }
 
   async findOne(
@@ -59,62 +33,64 @@ export class OrganizationService {
     return _.head(data);
   }
 
-  async update(
-    updateOrganizationDto: UpdateOrganizationDto,
-  ): Promise<Organization> {
-    const { id, name, address, telephone, fax, actor } = updateOrganizationDto;
+  findQueryBuilder(
+    params: FindOrganizationDto,
+  ): SelectQueryBuilder<Organization> {
+    const {
+      id,
+      ids,
+      search,
+      per_page,
+      page = 1,
+      order_by,
+      sorted_by = 'ASC',
+      relations,
+    } = params;
 
-    const data = await this.organizationRepository.findOne({ id });
-
-    if (!data) {
-      throw new RpcException(
-        JSON.stringify({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Count not find resource ${id}.`,
-          error: 'Not Found',
-        }),
-      );
+    const filteredIds = ids === undefined ? [] : ids;
+    if (id !== undefined) {
+      filteredIds.push(id);
     }
 
-    await this.organizationRepository.save({
-      ...data,
-      name,
-      address,
-      telephone,
-      fax,
-      updated_by: actor,
-    });
+    let qb = this.organizationRepository
+      .createQueryBuilder('organization')
+      .where((qb) => {
+        qb.where({
+          ...(id || ids ? { id: In(filteredIds) } : {}),
+        });
 
-    return await this.findOne({ id: data.id });
-  }
+        if (search !== undefined) {
+          const params = { search: `%${search}%` };
 
-  async remove(
-    deleteOrganizationDto: DeleteOrganizationDto,
-  ): Promise<Organization> {
-    const { id, is_hard, actor } = deleteOrganizationDto;
-
-    const data = await this.organizationRepository.findOne({ id });
-
-    if (!data) {
-      throw new RpcException(
-        JSON.stringify({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Count not find resource ${id}.`,
-          error: 'Not Found',
-        }),
-      );
-    }
-
-    if (is_hard) {
-      await this.organizationRepository.remove(data);
-    } else {
-      await this.organizationRepository.save({
-        ...data,
-        deleted_by: actor,
-        deleted_at: new Date().toISOString(),
+          qb.andWhere(
+            new Brackets((q) => {
+              q.where('organization.name LIKE :search', params);
+            }),
+          );
+        }
       });
+
+    if (relations !== undefined) {
+      if (relations.includes('roles')) {
+        qb = qb.leftJoinAndSelect('organization.roles', 'roles');
+      }
+
+      if (relations.includes('users')) {
+        qb = qb.leftJoinAndSelect('organization.users', 'users');
+      }
     }
 
-    return data;
+    if (per_page !== undefined) {
+      qb = qb.take(per_page).skip(page > 1 ? per_page * (page - 1) : 0);
+    }
+
+    if (order_by !== undefined) {
+      qb = qb.orderBy(
+        order_by,
+        ['desc'].includes(sorted_by.toLowerCase()) ? 'DESC' : 'ASC',
+      );
+    }
+
+    return qb;
   }
 }

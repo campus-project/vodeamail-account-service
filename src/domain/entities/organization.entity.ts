@@ -3,9 +3,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity('organizations')
 export class Organization {
@@ -41,4 +43,9 @@ export class Organization {
 
   @Column({ type: 'uuid', nullable: true })
   deleted_by?: string;
+
+  @OneToMany(() => User, (object) => object.organization, {
+    onUpdate: 'CASCADE',
+  })
+  users: User[];
 }
