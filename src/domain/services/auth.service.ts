@@ -1,7 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Brackets, Raw, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ClientKafka, RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 import * as moment from 'moment';
@@ -21,8 +21,8 @@ import { LoginWithIdDto } from '../../application/dtos/auth/login-with-id.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('CLIENT_KAFKA')
-    private readonly clientKafka: ClientKafka,
+    @Inject('MAILER_SERVICE')
+    private readonly mailerService: ClientProxy,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
     @InjectRepository(Role)
@@ -32,14 +32,6 @@ export class AuthService {
     @InjectRepository(PasswordReset)
     private readonly passwordResetRepository: Repository<PasswordReset>,
   ) {}
-
-  onModuleInit() {
-    const patterns = ['createSendEmail'];
-
-    for (const pattern of patterns) {
-      this.clientKafka.subscribeToResponseOf(pattern);
-    }
-  }
 
   async login(loginDto: LoginDto): Promise<User> {
     const { email, password } = loginDto;
@@ -188,7 +180,7 @@ export class AuthService {
     const resetPasswordLink =
       url + (url.split('?')[1] ? '&' : '?') + params.join('&');
 
-    await this.clientKafka
+    await this.mailerService
       .send('createSendEmail', {
         organization_id: user.organization_id,
         from: 'no-reply@vodea.cloud',

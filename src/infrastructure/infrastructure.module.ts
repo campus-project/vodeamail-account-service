@@ -5,24 +5,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 const providers: Provider[] = [
   {
-    provide: 'CLIENT_KAFKA',
+    provide: 'MAILER_SERVICE',
     inject: [ConfigService],
     useFactory: (configService: ConfigService) =>
       ClientProxyFactory.create({
-        transport: Transport.KAFKA,
+        transport: Transport.TCP,
         options: {
-          client: {
-            clientId:
-              configService.get<string>('KAFKA_CLIENT_ID') || 'account-service',
-            brokers: [
-              configService.get<string>('KAFKA_BROKER') || 'localhost:9092',
-            ],
-          },
-          consumer: {
-            groupId:
-              configService.get<string>('KAFKA_CONSUMER_GROUP_ID') ||
-              'account-service-consumer',
-          },
+          host: configService.get<string>('MAILER_SERVICE_HOST'),
+          port: configService.get<number>('MAILER_SERVICE_PORT'),
         },
       }),
   },

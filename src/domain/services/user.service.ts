@@ -1,7 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Brackets, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ClientKafka, RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import * as _ from 'lodash';
 import { genSalt, hash } from 'bcryptjs';
@@ -17,19 +17,11 @@ import { UserEmailExistsDto } from '../../application/dtos/user/user-email-exist
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('CLIENT_KAFKA')
-    private readonly clientKafka: ClientKafka,
+    @Inject('MAILER_SERVICE')
+    private readonly mailerService: ClientProxy,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-
-  onModuleInit() {
-    const patterns = ['createSendEmail'];
-
-    for (const pattern of patterns) {
-      this.clientKafka.subscribeToResponseOf(pattern);
-    }
-  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { organization_id, name, email, role_id, actor } = createUserDto;
@@ -47,7 +39,7 @@ export class UserService {
       updated_by: actor,
     });
 
-    await this.clientKafka
+    await this.mailerService
       .send('createSendEmail', {
         organization_id: data.organization_id,
         from: 'no-reply@vodea.cloud',

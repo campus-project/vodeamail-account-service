@@ -8,6 +8,8 @@ import { ForgotPasswordDto } from '../dtos/auth/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/auth/reset-password.dto';
 import { LoginWithIdDto } from '../dtos/auth/login-with-id.dto';
 
+import { User } from '../../domain/entities/user.entity';
+
 @Controller()
 export class AuthController {
   constructor(
@@ -15,27 +17,31 @@ export class AuthController {
   ) {}
 
   @MessagePattern('authLogin')
-  login(@Payload('value') loginDto: LoginDto) {
+  async login(@Payload() loginDto: LoginDto): Promise<User> {
     return this.authService.login(loginDto);
   }
 
   @MessagePattern('authLoginWithId')
-  loginWithId(@Payload('value') loginWithId: LoginWithIdDto) {
+  async loginWithId(@Payload() loginWithId: LoginWithIdDto): Promise<User> {
     return this.authService.loginWithId(loginWithId);
   }
 
   @MessagePattern('authRegister')
-  register(@Payload('value') registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Payload() registerDto: RegisterDto): Promise<string> {
+    return await this.authService.register(registerDto);
   }
 
   @MessagePattern('authForgotPassword')
-  forgotPassword(@Payload('value') forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto);
+  async forgotPassword(
+    @Payload() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<string> {
+    return await this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @MessagePattern('authResetPassword')
-  resetPassword(@Payload('value') resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto);
+  async resetPassword(
+    @Payload() resetPasswordDto: ResetPasswordDto,
+  ): Promise<string> {
+    return await this.authService.resetPassword(resetPasswordDto);
   }
 }

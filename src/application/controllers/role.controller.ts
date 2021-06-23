@@ -8,6 +8,8 @@ import { FindRoleDto } from '../dtos/role/find-role.dto';
 import { DeleteRoleDto } from '../dtos/role/delete-role.dto';
 import { RoleIdExistsDto } from '../dtos/role/role-id-exists.dto';
 
+import { Role } from '../../domain/entities/role.entity';
+
 @Controller()
 export class RoleController {
   constructor(
@@ -15,40 +17,40 @@ export class RoleController {
   ) {}
 
   @MessagePattern('createRole')
-  create(
-    @Payload('value')
+  async create(
+    @Payload()
     createRoleDto: CreateRoleDto,
-  ) {
-    return this.roleService.create(createRoleDto);
+  ): Promise<Role> {
+    return await this.roleService.create(createRoleDto);
   }
 
   @MessagePattern('findAllRole')
-  findAll(@Payload('value') findRole: FindRoleDto) {
-    return this.roleService.findAll(findRole);
+  async findAll(@Payload() findRole: FindRoleDto): Promise<Role[]> {
+    return await this.roleService.findAll(findRole);
   }
 
   @MessagePattern('findAllCountRole')
-  findAllCount(@Payload('value') findRole: FindRoleDto) {
-    return this.roleService.findAllCount(findRole);
+  async findAllCount(@Payload() findRole: FindRoleDto): Promise<number> {
+    return await this.roleService.findAllCount(findRole);
   }
 
   @MessagePattern('findOneRole')
-  findOne(@Payload('value') findRole: FindRoleDto) {
-    return this.roleService.findOne(findRole);
+  async findOne(@Payload() findRole: FindRoleDto): Promise<Role> {
+    return await this.roleService.findOne(findRole);
   }
 
   @MessagePattern('updateRole')
-  update(@Payload('value') updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(updateRoleDto);
+  async update(@Payload() updateRoleDto: UpdateRoleDto): Promise<Role> {
+    return await this.roleService.update(updateRoleDto);
   }
 
   @MessagePattern('removeRole')
-  remove(@Payload('value') deleteRole: DeleteRoleDto) {
-    return this.roleService.remove(deleteRole);
+  async remove(@Payload() deleteRole: DeleteRoleDto): Promise<Role> {
+    return await this.roleService.remove(deleteRole);
   }
 
   @MessagePattern('existsRole')
-  exists(@Payload('value') existsRole: RoleIdExistsDto) {
-    return this.roleService.idExists(existsRole);
+  async exists(@Payload() existsRole: RoleIdExistsDto): Promise<boolean> {
+    return await this.roleService.idExists(existsRole);
   }
 }

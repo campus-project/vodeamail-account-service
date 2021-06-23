@@ -8,6 +8,9 @@ import { ChangePasswordAccountDto } from '../dtos/account/change-password-accoun
 import { GetMyOrganizationDto } from '../dtos/account/get-my-organization.dto';
 import { UpdateMyOrganizationDto } from '../dtos/account/update-my-organization.dto';
 
+import { User } from '../../domain/entities/user.entity';
+import { Organization } from '../../domain/entities/organization.entity';
+
 @Controller()
 export class AccountController {
   constructor(
@@ -15,33 +18,39 @@ export class AccountController {
   ) {}
 
   @MessagePattern('getAccount')
-  getAccount(@Payload('value') getAccountDto: GetAccountDto) {
-    return this.accountService.getAccount(getAccountDto);
+  async getAccount(@Payload() getAccountDto: GetAccountDto): Promise<User> {
+    return await this.accountService.getAccount(getAccountDto);
   }
 
   @MessagePattern('updateAccount')
-  updateAccount(@Payload('value') updateAccountDto: UpdateAccountDto) {
-    return this.accountService.updateAccount(updateAccountDto);
+  async updateAccount(
+    @Payload() updateAccountDto: UpdateAccountDto,
+  ): Promise<User> {
+    return await this.accountService.updateAccount(updateAccountDto);
   }
 
   @MessagePattern('changePasswordAccount')
-  changePasswordAccount(
-    @Payload('value') changePasswordAccountDto: ChangePasswordAccountDto,
-  ) {
-    return this.accountService.changePasswordAccount(changePasswordAccountDto);
+  async changePasswordAccount(
+    @Payload() changePasswordAccountDto: ChangePasswordAccountDto,
+  ): Promise<User> {
+    return await this.accountService.changePasswordAccount(
+      changePasswordAccountDto,
+    );
   }
 
   @MessagePattern('getMyOrganization')
-  getMyOrganization(
-    @Payload('value') getMyOrganizationDto: GetMyOrganizationDto,
-  ) {
-    return this.accountService.getMyOrganization(getMyOrganizationDto);
+  async getMyOrganization(
+    @Payload() getMyOrganizationDto: GetMyOrganizationDto,
+  ): Promise<Organization> {
+    return await this.accountService.getMyOrganization(getMyOrganizationDto);
   }
 
   @MessagePattern('updateMyOrganization')
-  updateMyOrganization(
-    @Payload('value') updateMyOrganizationDto: UpdateMyOrganizationDto,
-  ) {
-    return this.accountService.updateMyOrganization(updateMyOrganizationDto);
+  async updateMyOrganization(
+    @Payload() updateMyOrganizationDto: UpdateMyOrganizationDto,
+  ): Promise<Organization> {
+    return await this.accountService.updateMyOrganization(
+      updateMyOrganizationDto,
+    );
   }
 }

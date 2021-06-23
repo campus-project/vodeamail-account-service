@@ -19,8 +19,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install NPM Dependencies
         run: yarn install
-#      - name: Execute tests (Unit and e2e tests)
-#        run: yarn test --watchAll=false
+      - name: Execute tests (Unit and e2e tests)
+        run: yarn test --watchAll=false
   setup-build-publish-deploy:
     name: Setup, Build, and Publish
     runs-on: ubuntu-latest
