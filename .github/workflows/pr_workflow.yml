@@ -30,4 +30,4 @@ jobs:
           DB_DATABASE: homestead
           DB_USERNAME: root
           DB_PASSWORD: secret
-        run: yarn test --watchAll=false
+        run: yarn test --forceExit --detectOpenHandles
