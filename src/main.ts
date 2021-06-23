@@ -17,7 +17,7 @@ patchTypeORMRepositoryWithBaseRepository();
 
 (async () => {
   const configService = new ConfigService();
-  const logger = new Logger('MAIN');
+  const logger = new Logger('Main');
 
   const appHost = configService.get<string>('APP_HOST');
   const appPort = configService.get<number>('APP_PORT');
